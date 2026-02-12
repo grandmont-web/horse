@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>水墨奔騰迎錦泰</title>
 
-    <!-- 1. 引入 Firebase Compat SDK -->
+    <!-- 1. 引入 Firebase Compat SDK (確保在任何環境都能載入) -->
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
@@ -60,15 +60,17 @@
         }
 
         .ink-title {
-            font-family: 'Ma Shan Zheng', cursive;
-            font-size: 5rem; 
+            font-family: 'Ma Shan Zheng', cursive; 
+            font-size: 6rem;
             color: #2c2c2c;
             margin: 0 0 20px 0;
             white-space: nowrap;
+            letter-spacing: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1); 
         }
 
         @media (min-width: 768px) {
-            .ink-title { font-size: 5.5rem; }
+            .ink-title { font-size: 7rem; }
         }
 
         .ink-char {
@@ -211,7 +213,9 @@
         #score-display {
             position: absolute;
             top: 20px;
-            right: 30px;
+            right: 10px; 
+            width: 300px; 
+            text-align: left; 
             font-size: 3.5rem;
             font-family: 'Ma Shan Zheng', cursive;
             color: #2c2c2c;
@@ -220,18 +224,15 @@
             text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.6);
         }
 
-        /* 學生姓名顯示 (遊戲中) */
         #player-name-display {
             position: absolute;
-            bottom: 0; /* 貼底 */
+            bottom: 0;
             left: 0;
             width: 100%;
-            height: 25%; /* 佔據地面高度 (地面高度為 25%) */
-            display: flex; /* 使用 Flexbox */
-            justify-content: center; /* 水平置中 */
-            align-items: center; /* 垂直置中 */
-            
-            /* 字體樣式 */
+            height: 25%; 
+            display: flex;
+            justify-content: center; 
+            align-items: center;
             text-align: center;
             font-family: 'Ma Shan Zheng', cursive;
             font-size: 3.5rem; 
@@ -246,7 +247,6 @@
             animation: breathe 5s ease-in-out infinite;
         }
 
-        /* 排名顯示文字 */
         #rank-display {
             margin-top: 15px;
             font-size: 2rem;
@@ -292,22 +292,19 @@
             color: #888;
             pointer-events: none;
             text-align: right;
+            z-index: 5;
         }
 
-        /* --- 排行榜樣式 --- */
-        #leaderboard-layer {
+        #leaderboard-layer, #password-modal {
             background: rgba(253, 251, 247, 0.98);
         }
-        
-        /* 密碼輸入框樣式 */
         #password-modal {
-            background: rgba(0,0,0,0.8);
-            z-index: 20;
+             background: rgba(0,0,0,0.8);
+             z-index: 20;
         }
-        
         #password-modal .idiom-box {
-            width: 300px;
-            text-align: center;
+             width: 300px;
+             text-align: center;
         }
 
         .leaderboard-container {
@@ -353,19 +350,19 @@
         .rank-3 .rank-num { color: #cd7f32; font-size: 1.3rem; text-shadow: 1px 1px 0px #a0522d; }
 
         .rank-num { font-weight: bold; width: 40px; text-align: center; font-family: 'Ma Shan Zheng', cursive; }
-        .rank-name { flex-grow: 1; padding-left: 10px; text-align: center; /* 姓名置中 */ }
+        .rank-name { flex-grow: 1; padding-left: 10px; text-align: center; }
         .rank-score { font-weight: bold; color: #d62828; width: 80px; text-align: right;}
         .badge { margin-left: 5px; font-size: 1.2rem; }
 
         .clear-btn { background: none; border: none; color: #999; font-size: 0.8rem; margin-top: 5px; cursor: pointer; text-decoration: underline; }
 
         @media (max-width: 768px) {
-            .ink-title { font-size: 2.8rem; }
+            .ink-title { font-size: 2.8rem; letter-spacing: 5px; } 
             h2 { font-size: 2rem; }
             p { font-size: 1rem; }
             .btn { font-size: 1.5rem; padding: 10px 30px; }
-            #score-display { font-size: 2.5rem; }
-            #player-name-display { font-size: 2rem; } /* 移除 bottom 覆蓋，使用 flex 佈局自動定位 */
+            #score-display { font-size: 2rem; width: 250px; } 
+            #player-name-display { font-size: 2rem; }
         }
     </style>
 </head>
@@ -375,7 +372,7 @@
         <div class="seal">中華<br>文化</div>
         <div id="score-display">距離: 0 米</div>
         <div id="player-name-display"></div>
-        <div id="img-status">圖片狀態: 載入中...</div>
+        <div id="img-status"></div>
         <canvas id="gameCanvas"></canvas>
 
         <div id="start-screen" class="ui-layer">
@@ -391,8 +388,8 @@
             
             <div class="input-group">
                 <select id="class-select"><option value="" disabled selected>請選擇班別</option></select>
-                <!-- 自訂姓名輸入框 (允許空白格) -->
-                <input type="text" id="custom-name-input" placeholder="請輸入自訂姓名 (可含空白)" maxlength="15">
+                <!-- 修正：移除預設提示的括號說明 -->
+                <input type="text" id="custom-name-input" placeholder="請輸入自訂姓名" maxlength="15">
                 <select id="student-select" disabled><option value="" disabled selected>請選擇姓名</option></select>
                 <select id="bg-select">
                     <option value="" selected>隨機背景 (預設)</option>
@@ -400,14 +397,16 @@
                     <option value="rain">煙雨濛濛</option>
                     <option value="snow">冬日飄雪</option>
                     <option value="night">月夜流螢</option>
-                    <option value="autumn">秋風落葉</option>
                     <option value="starry">繁星點點</option>
-                    <option value="thunder">雷電交加</option>
+                    <option value="autumn">秋風落葉</option>
+                    <option value="spring">春暖花開</option>
+                    <option value="storm">狂風暴雨</option>
+                    <option value="sand">大漠風沙</option>
+                    <option value="sunset">夕陽西下</option>
                 </select>
             </div>
 
-            <p style="margin-top: 20px;">點擊畫面或按空白鍵跳躍，避開障礙！</p>
-            <p style="font-size: 1.2rem; color: #d62828; font-weight: bold; margin-top:5px;">🔥 最後50米極限考驗</p>
+            <p style="margin-top: 20px;">奔騰500米直達終點，點擊畫面或按空白鍵跳躍，避開障礙！</p>
             
             <div class="btn-container">
                 <button id="start-btn" class="btn" onclick="window.startGame()" disabled>載入中...</button>
@@ -419,7 +418,6 @@
             <h2 id="end-title">馬到功成</h2>
             <p id="end-score">奔跑距離：計算中...</p> 
             
-            <!-- 排名顯示 -->
             <div id="rank-display"></div>
 
             <div class="idiom-box">
@@ -432,7 +430,6 @@
             </div>
         </div>
 
-        <!-- 排行榜畫面 -->
         <div id="leaderboard-layer" class="ui-layer hidden">
             <h2>🏆 排行榜 (前20名)</h2>
             <p style="margin-bottom: 10px;">誰是真正的千里馬？</p>
@@ -447,10 +444,9 @@
             <button class="btn" onclick="window.closeLeaderboard()">返回</button>
             <button class="clear-btn" onclick="window.requestClearPassword()">清除記錄 (教師用)</button>
         </div>
-
-        <!-- 密碼輸入畫面 (新增) -->
+        
         <div id="password-modal" class="ui-layer hidden">
-            <div class="idiom-box" style="text-align: center; max-width: 90%;">
+            <div class="idiom-box">
                 <h3>🔐 請輸入管理員密碼</h3>
                 <input type="password" id="admin-password" style="margin: 15px 0; width: 80%; font-size: 1.2rem;" placeholder="密碼">
                 <div style="display: flex; justify-content: center; gap: 10px;">
@@ -462,39 +458,28 @@
     </div>
 
     <script>
-        // --- 1. 圖片預載 ---
-        const loadedImages = {
-            run1: new Image(),
-            run2: new Image(),
-            jump: new Image()
-        };
+        const loadedImages = { run1: new Image(), run2: new Image(), jump: new Image() };
         let imagesLoadedCount = 0;
         const totalImages = 3;
+        let useImageAssets = true;
 
-        function checkImagesReady() {
+        function checkImagesReady(isError) {
+            if (isError) useImageAssets = false;
             imagesLoadedCount++;
             if (imagesLoadedCount === totalImages) {
                 const btn = document.getElementById('start-btn');
-                if(btn) {
-                    btn.innerText = "開始奔馳";
-                    btn.disabled = false;
-                }
-                const status = document.getElementById('img-status');
-                if(status) {
-                    status.innerText = "圖片狀態: 載入完成";
-                    status.style.color = "#27ae60";
-                }
+                if(btn) { btn.innerText = "開始奔馳"; btn.disabled = false; }
             }
         }
 
-        loadedImages.run1.onload = checkImagesReady;
-        loadedImages.run2.onload = checkImagesReady;
-        loadedImages.jump.onload = checkImagesReady;
+        loadedImages.run1.onload = () => checkImagesReady(false); loadedImages.run1.onerror = () => checkImagesReady(true);
+        loadedImages.run2.onload = () => checkImagesReady(false); loadedImages.run2.onerror = () => checkImagesReady(true);
+        loadedImages.jump.onload = () => checkImagesReady(false); loadedImages.jump.onerror = () => checkImagesReady(true);
+        
         loadedImages.run1.src = 'horse_run1.png';
         loadedImages.run2.src = 'horse_run2.png';
         loadedImages.jump.src = 'horse_jump.png';
 
-        // --- 2. 全域變數與 Firebase 設定 ---
         const firebaseConfig = {
             apiKey: "AIzaSyCdXs8koAE6yHcFlpn_AUwd-CVIra_JHeI",
             authDomain: "horse-953b3.firebaseapp.com",
@@ -535,7 +520,20 @@
         let spawnTimer = 0;
         let lastTime = 0;
 
-        // --- 3. 初始化 Firebase ---
+        // 天氣中文名稱
+        const weatherNames = {
+            'sunny': '晴空萬里',
+            'rain': '煙雨濛濛',
+            'snow': '冬日飄雪',
+            'night': '月夜流螢',
+            'starry': '繁星點點',
+            'autumn': '秋風落葉',
+            'spring': '春暖花開',
+            'storm': '狂風暴雨',
+            'sand': '大漠風沙',
+            'sunset': '夕陽西下'
+        };
+
         try {
             if (typeof firebase !== 'undefined') {
                 firebase.initializeApp(firebaseConfig);
@@ -561,8 +559,6 @@
         
         if(!useCloud) setupLocalFallback();
 
-        // --- 4. 排行榜邏輯函數 (本地與雲端) ---
-
         function setupLocalFallback() {
             window.saveRecord = function(name, distance) {
                 let finalDistance = Math.min(distance, 500);
@@ -577,14 +573,12 @@
                 renderLeaderboard(records);
                 document.getElementById('leaderboard-layer').classList.remove('hidden');
             };
-            
+
             window.performClear = function() {
-                if(confirm("確定要清除本機記錄嗎？")) {
-                    localStorage.removeItem('horseGame_leaders');
-                    alert("已清除");
-                    renderLeaderboard([]);
-                    window.closePasswordModal();
-                }
+                localStorage.removeItem('horseGame_leaders');
+                alert("已清除");
+                renderLeaderboard([]);
+                window.closePasswordModal();
             };
             
             window.checkMyRank = function(name, score) {
@@ -632,37 +626,18 @@
             };
 
             window.performClear = function() {
-                if(confirm("確定要清除所有雲端記錄嗎？")) {
-                     db.collection('artifacts').doc(APP_ID).collection('leaderboard').get().then(snapshot => {
-                         snapshot.forEach(doc => doc.ref.delete());
-                         alert("雲端記錄已清除");
-                         window.closePasswordModal();
-                     }).catch(e => alert("清除失敗"));
-                }
+                 db.collection('artifacts').doc(APP_ID).collection('leaderboard').get().then(snapshot => {
+                     snapshot.forEach(doc => doc.ref.delete());
+                     alert("雲端記錄已清除");
+                     window.closePasswordModal();
+                 }).catch(e => alert("清除失敗"));
             };
         }
 
-        // 密碼保護邏輯
-        window.requestClearPassword = function() {
-            document.getElementById('password-modal').classList.remove('hidden');
-            document.getElementById('admin-password').value = "";
-            document.getElementById('admin-password').focus();
-        };
+        window.requestClearPassword = function() { document.getElementById('password-modal').classList.remove('hidden'); document.getElementById('admin-password').value = ""; document.getElementById('admin-password').focus(); };
+        window.closePasswordModal = function() { document.getElementById('password-modal').classList.add('hidden'); };
+        window.confirmClearLeaderboard = function() { const password = document.getElementById('admin-password').value; if (password === "grandmont") { window.performClear(); } else { alert("密碼錯誤！"); } };
 
-        window.closePasswordModal = function() {
-            document.getElementById('password-modal').classList.add('hidden');
-        };
-
-        window.confirmClearLeaderboard = function() {
-            const password = document.getElementById('admin-password').value;
-            if (password === "grandmont") {
-                window.performClear();
-            } else {
-                alert("密碼錯誤！");
-            }
-        };
-
-        // 核心排名算法
         function calculateRank(records, myName, myScore) {
             records.sort((a, b) => {
                 if (b.score !== a.score) return b.score - a.score;
@@ -675,7 +650,6 @@
 
             for (let i = 0; i < records.length; i++) {
                 let rec = records[i];
-                
                 if (rec.score !== prevScore) {
                     currentRank++;
                 }
@@ -723,7 +697,7 @@
                 
                 let rankToShow = (rec.score >= 500) ? 1 : currentRank;
                 
-                if (displayCount >= 20) break;
+                if (displayCount >= 20) break; 
 
                 let rankClass = "";
                 if (rankToShow === 1) rankClass = "rank-1";
@@ -732,10 +706,12 @@
 
                 let badge = (rec.score >= 500) ? '<span class="badge">🏅</span>' : '';
 
+                let cleanName = rec.name;
+
                 html += `
                     <div class="leaderboard-item ${rankClass}">
                         <span class="rank-num">${rankToShow}</span>
-                        <span class="rank-name">${rec.name || "無名氏"}${badge}</span>
+                        <span class="rank-name">${cleanName || "無名氏"}${badge}</span>
                         <span class="rank-score">${rec.score} 米</span>
                     </div>
                 `;
@@ -751,8 +727,6 @@
         }
         
         window.closeLeaderboard = function() { document.getElementById('leaderboard-layer').classList.add('hidden'); };
-
-        // --- 5. 遊戲物件類別 ---
 
         function resize() {
             canvasWidth = canvas.width = window.innerWidth;
@@ -806,46 +780,44 @@
         class WeatherParticle {
             constructor(type) {
                 this.type = type; this.x = Math.random() * (canvasWidth + 200); this.y = Math.random() * canvasHeight;
-                if (type === 'rain' || type === 'thunder') { this.vy = Math.random() * 15 + 15; this.vx = -4; this.length = Math.random() * 20 + 20; }
+                if (type === 'rain' || type === 'storm') { this.vy = Math.random() * 15 + 15; this.vx = -4; this.length = Math.random() * 20 + 20; if(type==='storm'){ this.vx = -15; this.vy = 25; } }
                 else if (type === 'snow') { this.vy = Math.random() * 3 + 2; this.vx = Math.random() * 2 - 1; this.size = Math.random() * 4 + 2; this.swing = Math.random() * Math.PI * 2; }
                 else if (type === 'autumn') { this.vy = Math.random() * 2 + 1; this.vx = Math.random() * -3 - 2; this.size = Math.random() * 6 + 4; this.rotation = Math.random() * 360; this.rotationSpeed = Math.random() * 4 - 2; const colors = ['rgba(160, 82, 45, 0.8)', 'rgba(205, 92, 92, 0.8)', 'rgba(218, 165, 32, 0.8)']; this.color = colors[Math.floor(Math.random() * colors.length)]; }
+                else if (type === 'spring') { this.vy = Math.random() * 2 + 1; this.vx = Math.random() * -2 - 1; this.size = Math.random() * 5 + 3; this.rotation = Math.random() * 360; this.rotationSpeed = Math.random() * 3 - 1.5; this.color = 'rgba(255, 183, 197, 0.95)'; } 
+                else if (type === 'sand') { this.vx = -Math.random() * 15 - 10; this.vy = Math.random() * 2 - 1; this.size = Math.random() * 2 + 1; this.color = 'rgba(194, 178, 128, 0.6)'; }
                 else if (type === 'night' || type === 'starry') { 
-                    this.isStar = (type === 'starry');
+                    this.isStar = (type === 'starry'); 
                     this.vx = this.isStar ? 0 : Math.random() * 2 - 1; 
                     this.vy = this.isStar ? 0 : Math.random() * 2 - 1; 
                     this.size = Math.random() * 3 + 1; 
                     this.alpha = Math.random(); 
                     this.alphaSpeed = 0.02; 
+                    if(this.isStar) this.y = Math.random() * (groundHeight * 0.6); 
                 }
             }
             update() {
                 if (this.type === 'night' || this.type === 'starry') {
-                    if(!this.isStar) {
-                        this.x += this.vx - (speed * 0.2); this.y += this.vy; 
-                        if (this.x < -50) this.x = canvasWidth + 50; if (this.y < 0) this.y = canvasHeight; if (this.y > canvasHeight) this.y = 0;
-                    }
-                    this.alpha += this.alphaSpeed;
-                    if (this.alpha > 1 || this.alpha < 0.2) this.alphaSpeed *= -1;
+                    if(!this.isStar) { this.x += this.vx - (speed * 0.2); this.y += this.vy; if (this.x < -50) this.x = canvasWidth + 50; if (this.y < 0) this.y = canvasHeight; if (this.y > canvasHeight) this.y = 0; }
+                    this.alpha += this.alphaSpeed; if (this.alpha > 1 || this.alpha < 0.2) this.alphaSpeed *= -1;
+                } else if (this.type === 'spring' || this.type === 'autumn') {
+                    this.x += this.vx; this.y += this.vy; this.rotation += this.rotationSpeed;
+                    if (this.y > canvasHeight || this.x < -50) { this.y = -20; this.x = Math.random() * (canvasWidth + 200); }
+                } else if (this.type === 'sand') {
+                    this.x += this.vx;
+                    if (this.x < -50) this.x = canvasWidth + 50;
                 } else {
                     this.y += this.vy;
                     if (this.type === 'snow') { this.swing += 0.05; this.x += Math.sin(this.swing) * 1 + this.vx; this.x -= speed * 0.2; }
-                    else if (this.type === 'autumn') { this.x += this.vx; this.rotation += this.rotationSpeed; this.x -= speed * 0.2; }
                     else { this.x += this.vx; this.x -= speed * 0.5; }
                     if (this.y > canvasHeight || this.x < -100) { this.y = -20; this.x = Math.random() * (canvasWidth + 200); }
                 }
             }
             draw() {
-                if (this.type === 'rain' || this.type === 'thunder') { ctx.strokeStyle = 'rgba(120, 130, 140, 0.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x + this.vx * 2, this.y + this.length); ctx.stroke(); }
+                if (this.type === 'rain' || this.type === 'storm') { ctx.strokeStyle = 'rgba(120, 130, 140, 0.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x + this.vx * 2, this.y + this.length); ctx.stroke(); }
                 else if (this.type === 'snow') { ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
-                else if (this.type === 'autumn') { ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.rotation * Math.PI / 180); ctx.fillStyle = this.color; ctx.beginPath(); ctx.ellipse(0, 0, this.size, this.size/2, 0, 0, Math.PI*2); ctx.fill(); ctx.restore(); }
-                else if (this.type === 'night' || this.type === 'starry') { 
-                    let color = this.isStar ? `rgba(255, 255, 230, ${this.alpha})` : `rgba(200, 255, 100, ${this.alpha})`;
-                    ctx.fillStyle = color; 
-                    ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); 
-                    if(!this.isStar) {
-                         ctx.fillStyle = `rgba(200, 255, 100, ${this.alpha * 0.3})`; ctx.beginPath(); ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2); ctx.fill(); 
-                    }
-                }
+                else if (this.type === 'autumn' || this.type === 'spring') { ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.rotation * Math.PI / 180); ctx.fillStyle = this.color; ctx.beginPath(); ctx.ellipse(0, 0, this.size, this.size/2, 0, 0, Math.PI*2); ctx.fill(); ctx.restore(); }
+                else if (this.type === 'sand') { ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
+                else if (this.type === 'night' || this.type === 'starry') { let color = this.isStar ? `rgba(255, 255, 230, ${this.alpha})` : `rgba(200, 255, 100, ${this.alpha})`; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); if(!this.isStar) { ctx.fillStyle = `rgba(200, 255, 100, ${this.alpha * 0.3})`; ctx.beginPath(); ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2); ctx.fill(); } }
             }
         }
 
@@ -854,10 +826,12 @@
                 this.type = type; this.particles = [];
                 if (this.type !== 'sunny') {
                     let count = 50; 
-                    if (this.type === 'rain' || this.type === 'thunder') count = 80; 
+                    if (this.type === 'rain' || this.type === 'storm') count = 80; 
+                    if(this.type === 'storm') count=120; 
                     if (this.type === 'night') count = 30; 
-                    if (this.type === 'starry') count = 100;
-                    if (this.type === 'autumn') count = 40;
+                    if (this.type === 'starry') count = 100; 
+                    if (this.type === 'autumn' || this.type === 'spring') count = 40;
+                    if (this.type === 'sand') count = 150;
                     for(let i=0; i<count; i++) { this.particles.push(new WeatherParticle(this.type)); }
                 }
             }
@@ -888,7 +862,10 @@
         class Background {
             constructor() {
                 this.mountains = []; let currentX = 0; while (currentX < canvasWidth + 500) { this.addMountain(currentX); let lastM = this.mountains[this.mountains.length - 1]; currentX = lastM.x + lastM.width - 100; }
-                this.clouds = []; for(let i=0; i<5; i++) this.clouds.push(new Cloud());
+                this.clouds = []; 
+                let cloudCount = 5;
+                if(weatherSystem.type === 'starry' || weatherSystem.type === 'night' || weatherSystem.type === 'sand') cloudCount = 1;
+                for(let i=0; i<cloudCount; i++) this.clouds.push(new Cloud());
                 this.bamboos = []; for(let i=0; i<12; i++) this.bamboos.push(new Bamboo());
                 this.birds = []; for(let i=0; i<3; i++) this.birds.push(new Bird());
             }
@@ -900,41 +877,50 @@
                 this.bamboos.sort((a, b) => a.depth - b.depth); this.bamboos.forEach(b => b.update()); this.birds.forEach(b => b.update());
             }
             draw() {
-                let bgColor = '#fdfbf7'; // sunny
-                if (weatherSystem.type === 'rain' || weatherSystem.type === 'thunder') bgColor = '#cfd3d6'; 
+                let bgColor = '#fdfbf7'; 
+                if (weatherSystem.type === 'rain' || weatherSystem.type === 'storm') bgColor = '#cfd3d6'; 
                 else if (weatherSystem.type === 'snow') bgColor = '#dbe4eb'; 
                 else if (weatherSystem.type === 'night' || weatherSystem.type === 'starry') bgColor = '#7f8fa6'; 
-                else if (weatherSystem.type === 'autumn') bgColor = '#fdf5e6'; 
+                else if (weatherSystem.type === 'autumn') bgColor = '#fdf5e6';
+                else if (weatherSystem.type === 'spring') bgColor = '#fff0f5'; 
+                else if (weatherSystem.type === 'sand') bgColor = '#f0e68c'; 
+                else if (weatherSystem.type === 'sunset') bgColor = '#ffdab9'; 
 
-                ctx.fillStyle = bgColor;
+                if(weatherSystem.type === 'sunset') {
+                    let grd = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+                    grd.addColorStop(0, "#ff7e5f");
+                    grd.addColorStop(1, "#feb47b");
+                    ctx.fillStyle = grd;
+                } else if(weatherSystem.type === 'sunny') {
+                    ctx.fillStyle = '#87CEEB'; // Sky Blue
+                } else {
+                    ctx.fillStyle = bgColor; 
+                }
                 ctx.fillRect(0, 0, canvasWidth, groundHeight);
                 
-                // 雷電效果
-                if (weatherSystem.type === 'thunder' && Math.random() < 0.02) {
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-                    ctx.fillStyle = bgColor; // 恢復
-                }
-
-                if (weatherSystem.type === 'night' || weatherSystem.type === 'starry') { 
-                    ctx.fillStyle = '#fdfbf7'; ctx.beginPath(); ctx.arc(canvasWidth * 0.8, canvasHeight * 0.2, 30, 0, Math.PI*2); ctx.fill(); 
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; ctx.beginPath(); ctx.arc(canvasWidth * 0.8, canvasHeight * 0.2, 45, 0, Math.PI*2); ctx.fill(); 
-                } 
-                else if (weatherSystem.type !== 'rain' && weatherSystem.type !== 'thunder') { 
+                if (weatherSystem.type === 'storm' && Math.random() < 0.05) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvasWidth, canvasHeight); ctx.fillStyle = bgColor; }
+                
+                if (weatherSystem.type === 'night' || weatherSystem.type === 'starry') { ctx.fillStyle = '#fdfbf7'; ctx.beginPath(); ctx.arc(canvasWidth * 0.8, canvasHeight * 0.2, 30, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; ctx.beginPath(); ctx.arc(canvasWidth * 0.8, canvasHeight * 0.2, 45, 0, Math.PI*2); ctx.fill(); }
+                else if (weatherSystem.type !== 'rain' && weatherSystem.type !== 'storm' && weatherSystem.type !== 'sand') { 
                     if (weatherSystem.type === 'autumn') ctx.fillStyle = '#e17055'; else ctx.fillStyle = '#b33939'; 
                     ctx.beginPath(); ctx.arc(canvasWidth * 0.8, canvasHeight * 0.2, 40, 0, Math.PI*2); ctx.fill(); 
                 }
-
+                
                 this.clouds.forEach(c => c.draw()); 
+                
                 this.mountains.forEach(m => { 
                     if (weatherSystem.type === 'night' || weatherSystem.type === 'starry') ctx.fillStyle = `rgba(20, 30, 40, ${m.opacity + 0.2})`; 
+                    else if (weatherSystem.type === 'sand') ctx.fillStyle = `rgba(139, 69, 19, ${m.opacity + 0.1})`;
                     else ctx.fillStyle = `rgba(100, 100, 100, ${m.opacity})`; 
                     ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.bezierCurveTo(m.x + m.width/3, m.y - m.height, m.x + m.width*0.6, m.y - m.height/2, m.x + m.width, m.y); ctx.fill(); 
                 });
+                
                 this.bamboos.forEach(b => b.draw()); this.birds.forEach(b => b.draw());
                 
                 ctx.beginPath(); ctx.rect(0, groundHeight, canvasWidth, canvasHeight - groundHeight); 
-                if (weatherSystem.type === 'night' || weatherSystem.type === 'starry') ctx.fillStyle = '#95a5a6'; else ctx.fillStyle = '#e8e6e1'; 
+                if (weatherSystem.type === 'night' || weatherSystem.type === 'starry') ctx.fillStyle = '#95a5a6'; 
+                else if(weatherSystem.type === 'sand') ctx.fillStyle = '#e3dac9';
+                else ctx.fillStyle = '#e8e6e1'; 
                 ctx.fill();
                 ctx.beginPath(); ctx.moveTo(0, groundHeight); ctx.lineTo(canvasWidth, groundHeight); ctx.strokeStyle = '#555'; ctx.lineWidth = 2; ctx.stroke();
             }
@@ -942,36 +928,43 @@
 
         class Horse {
             constructor() {
-                this.scale = 0.6; this.width = 120 * this.scale; this.height = 100 * this.scale; this.x = canvasWidth * 0.15; this.y = groundHeight - this.height;
-                this.vy = 0; this.weight = 2.5; this.jumpStrength = -28; this.isJumping = false; this.frame = 0;
-                
-                // 這裡改用預載好的圖片
-                this.useImage = true;
+                this.scale = 0.6; 
+                this.width = 120 * this.scale; 
+                this.height = 100 * this.scale;
+                this.x = canvasWidth * 0.15;
+                this.y = groundHeight - this.height;
+                this.vy = 0; 
+                this.weight = 2.5; 
+                this.jumpStrength = -28; 
+                this.isJumping = false;
+                this.frame = 0;
+                this.useImage = useImageAssets; // 使用全域標記
                 this.runImg1 = loadedImages.run1;
                 this.runImg2 = loadedImages.run2;
                 this.jumpImg = loadedImages.jump;
             }
-            
             checkImages() { return true; }
-
             update() { this.vy += this.weight; this.y += this.vy; if (this.y > groundHeight - this.height) { this.y = groundHeight - this.height; this.vy = 0; this.isJumping = false; } this.frame++; }
-            
             draw() {
                 try {
-                    ctx.save(); 
-                    let currentImg; 
-                    if (this.isJumping) { currentImg = this.jumpImg; } else { currentImg = (Math.floor(this.frame / 6) % 2 === 0) ? this.runImg1 : this.runImg2; }
-                    
-                    if (currentImg && currentImg.complete && currentImg.naturalWidth > 0) { 
-                        let drawW = 150; let drawH = 150 * (currentImg.height / currentImg.width); 
-                        if (!isFinite(drawH)) drawH = 100; 
-                        let drawY = this.y - 30; 
-                        let bounce = this.isJumping ? 0 : Math.sin(this.frame * 0.8) * 3; 
-                        ctx.drawImage(currentImg, this.x, drawY + bounce, drawW, drawH); 
-                    } else { 
-                        this.drawVectorHorse(); 
-                    } 
-                    ctx.restore();
+                    if(this.useImage) {
+                        ctx.save(); 
+                        let currentImg; 
+                        if (this.isJumping) { currentImg = this.jumpImg; } else { currentImg = (Math.floor(this.frame / 6) % 2 === 0) ? this.runImg1 : this.runImg2; }
+                        
+                        if (currentImg && currentImg.complete && currentImg.naturalWidth > 0) { 
+                            let drawW = 150; let drawH = 150 * (currentImg.height / currentImg.width); 
+                            if (!isFinite(drawH)) drawH = 100; 
+                            let drawY = this.y - 30; 
+                            let bounce = this.isJumping ? 0 : Math.sin(this.frame * 0.8) * 3; 
+                            ctx.drawImage(currentImg, this.x, drawY + bounce, drawW, drawH); 
+                        } else { 
+                            this.drawVectorHorse(); 
+                        } 
+                        ctx.restore();
+                    } else {
+                        this.drawVectorHorse();
+                    }
                 } catch (e) { 
                     console.error("Draw error:", e);
                     this.drawVectorHorse(); 
@@ -984,13 +977,21 @@
             }
             drawBrushLeg(x, y, swing, isFar) { ctx.lineWidth = isFar ? 6 : 8; ctx.strokeStyle = isFar ? '#2a2a2a' : '#000'; ctx.beginPath(); ctx.moveTo(x, y); let kneeX = x + swing * 20; let kneeY = y + 30; if (this.isJumping) { kneeY = y + 20; if(x > 50) { kneeX = x + 30; } else { kneeX = x - 10; } } let footX = kneeX + (swing * 15); let footY = kneeY + 30; ctx.quadraticCurveTo(x - 5, y + 15, kneeX, kneeY); ctx.stroke(); ctx.lineWidth = isFar ? 4 : 5; ctx.beginPath(); ctx.moveTo(kneeX, kneeY); ctx.lineTo(footX, footY); ctx.stroke(); }
             jump() {
-                if (!this.isJumping) { this.vy = this.jumpStrength; this.isJumping = true; try { playTone(400, 'triangle'); } catch(e) {} for(let i=0; i<8; i++) { particles.push(new Particle(this.x + 50, this.y + this.height)); } }
+                if (!this.isJumping) {
+                    this.vy = this.jumpStrength;
+                    this.isJumping = true;
+                    try { playTone(400, 'triangle'); } catch(e) {}
+                    for(let i=0; i<8; i++) {
+                        particles.push(new Particle(this.x + 50, this.y + this.height));
+                    }
+                }
             }
         }
 
         class Obstacle {
             constructor() {
                 this.width = Math.random() * 30 + 30; let currentDist = Math.floor(score/5);
+                
                 if (currentDist >= 450) {
                     // 極限階段：高度提升 (50-80)
                     this.height = Math.random() * 30 + 50; 
@@ -1000,19 +1001,46 @@
                 } else {
                     this.height = Math.random() * 25 + 25; 
                 }
+                
                 this.x = canvasWidth;
                 this.y = groundHeight - this.height;
                 this.markedForDeletion = false;
                 this.type = Math.random() > 0.6 ? 'rock' : 'bush';
             }
-            update() { this.x -= speed * speedMultiplier; if (this.x < -this.width) this.markedForDeletion = true; }
+            update() {
+                this.x -= speed * speedMultiplier;
+                if (this.x < -this.width) this.markedForDeletion = true;
+            }
             draw() {
                 ctx.fillStyle = '#2d2d2d';
-                if (this.type === 'rock') { ctx.beginPath(); ctx.moveTo(this.x, this.y + this.height); ctx.lineTo(this.x + 10, this.y + 10); ctx.lineTo(this.x + this.width / 2, this.y); ctx.lineTo(this.x + this.width - 5, this.y + 15); ctx.lineTo(this.x + this.width, this.y + this.height); ctx.fill(); ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(this.x + 10, this.y + this.height); ctx.lineTo(this.x + 20, this.y + 20); ctx.stroke(); } else { ctx.beginPath(); ctx.arc(this.x + this.width/2, this.y + this.height, this.width/2, Math.PI, 0); ctx.fill(); ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(this.x + 10, this.y + this.height - 10, 5, 0, Math.PI*2); ctx.arc(this.x + this.width - 10, this.y + this.height - 5, 4, 0, Math.PI*2); ctx.fill(); }
+                if (this.type === 'rock') {
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y + this.height);
+                    ctx.lineTo(this.x + 10, this.y + 10);
+                    ctx.lineTo(this.x + this.width / 2, this.y);
+                    ctx.lineTo(this.x + this.width - 5, this.y + 15);
+                    ctx.lineTo(this.x + this.width, this.y + this.height);
+                    ctx.fill();
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x + 10, this.y + this.height);
+                    ctx.lineTo(this.x + 20, this.y + 20);
+                    ctx.stroke();
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(this.x + this.width/2, this.y + this.height, this.width/2, Math.PI, 0);
+                    ctx.fill();
+                    ctx.fillStyle = '#000';
+                    ctx.beginPath();
+                    ctx.arc(this.x + 10, this.y + this.height - 10, 5, 0, Math.PI*2);
+                    ctx.arc(this.x + this.width - 10, this.y + this.height - 5, 4, 0, Math.PI*2);
+                    ctx.fill();
+                }
             }
         }
 
-        // --- 6. 遊戲與選單邏輯 ---
+        // --- 7. 選單邏輯 ---
         const studentDB = {
             "1A": ["1 陳熹雋","2 陳意衡","3 陳彥君","4 陳楚皓","5 陳彥羲","6 侯林菲","7 許皓琳","8 黃煜軒","9 關旨荇","10 劉卓瀅","11 劉仲宇","12 羅卓熙","13 李芯悦","14 呂俊霖","15 呂仲軒","16 吳諾兒","17 彭梓悦","18 施鈞源","19 孫子豪","20 曾以仁","21 曹正","22 王天宇","23 王柏諾","24 胡悦翹"],
             "1B": ["1 陳曉瑩","2 陳梓韜","3 陳永昇","4 陳悅心","5 張峻烽","6 蔡宏鑫","7 朱灝喆","8 何允恒","9 韓欣穎","10 叶宇恒","11 江泳琳","12 關明菲","13 鄺雪晴","14 劉芊汝","15 羅復希","16 李俊霆","17 李鎧","18 梁凱淇","19 巫恒逸","20 柯芷晴","21 蘇智泓","22 曾鋭彬","23 尹梓言","24 胡梓榣","25 丘文博","26 朱鑠穎"],
@@ -1059,7 +1087,6 @@
         const studentSelect = document.getElementById('student-select');
         const customInput = document.getElementById('custom-name-input');
         
-        // 加入自訂選項
         const customOption = document.createElement('option');
         customOption.value = "custom";
         customOption.innerText = "--- 自訂 ---";
@@ -1074,21 +1101,17 @@
 
         classSelect.addEventListener('change', function() {
             const selectedClass = this.value;
-            
             if (selectedClass === "custom") {
-                // 自訂模式
                 studentSelect.style.display = "none";
                 customInput.style.display = "block";
                 customInput.value = "";
                 customInput.focus();
                 studentSelect.disabled = true;
             } else {
-                // 一般模式
                 studentSelect.style.display = "block";
                 customInput.style.display = "none";
                 studentSelect.innerHTML = '<option value="" disabled selected>請選擇姓名</option>';
                 studentSelect.disabled = false;
-                
                 if (studentDB[selectedClass]) {
                     studentDB[selectedClass].forEach(stu => { 
                         const option = document.createElement('option'); 
@@ -1118,17 +1141,13 @@
             
             let statusDiv = document.getElementById('img-status');
             if(statusDiv) {
-                if(imagesLoadedCount === totalImages) {
-                    statusDiv.innerText = "圖片狀態: 載入完成";
-                    statusDiv.style.color = "#27ae60";
-                } else {
-                    statusDiv.innerText = "圖片狀態: 檢查中...";
-                }
+                // 僅保留衝刺提示，移除載入文字
+                statusDiv.innerText = "";
             }
 
             let type = forceType;
             if (!type || type === 'random') {
-                const weathers = ['sunny', 'rain', 'snow', 'night', 'autumn']; 
+                const weathers = ['sunny', 'rain', 'snow', 'night', 'autumn', 'storm', 'sand', 'sunset', 'starry']; 
                 type = weathers[Math.floor(Math.random() * weathers.length)];
             }
             console.log("Current Weather:", type);
@@ -1153,7 +1172,7 @@
             if (selectedClass === "custom") {
                 let name = customInput.value.trim();
                 if (!name) { alert("請輸入自訂姓名！"); return; }
-                currentPlayerName = name; // 自訂模式直接使用名字，不加前綴
+                currentPlayerName = name; 
             } else {
                 const selectedName = studentSelect.value;
                 if (!selectedName) { 
@@ -1163,7 +1182,18 @@
                 }
             }
             
-            document.getElementById('player-name-display').innerText = currentPlayerName;
+            // 姓名顯示變數 (遊戲中顯示)
+            let displayName = currentPlayerName;
+            
+            initGame(selectedBg);
+            
+            const weatherName = weatherNames[weatherSystem.type] || "";
+            if (currentPlayerName) {
+                // 遊戲中顯示帶天氣
+                displayName = `${currentPlayerName}@${weatherName}`;
+            }
+
+            document.getElementById('player-name-display').innerText = displayName;
 
             classSelect.blur();
             studentSelect.blur();
@@ -1175,8 +1205,6 @@
 
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('end-screen').classList.add('hidden');
-            
-            initGame(selectedBg);
             
             isPlaying = true;
             lastTime = 0;
@@ -1202,7 +1230,6 @@
 
                 if (!isPlaying) return;
 
-                // --- 畫面震動效果 (最後50米) ---
                 let currentDist = Math.floor(score/5);
                 let shakeX = 0;
                 let shakeY = 0;
@@ -1214,7 +1241,6 @@
 
                 ctx.clearRect(0, 0, canvasWidth, canvasHeight);
                 
-                // 應用震動
                 ctx.save();
                 ctx.translate(shakeX, shakeY);
 
@@ -1322,7 +1348,6 @@
                 weatherSystem.update();
                 weatherSystem.draw();
 
-                // 恢復畫布狀態
                 ctx.restore();
 
                 if (isPlaying) {
@@ -1330,10 +1355,18 @@
                 }
                 
                 currentDist = Math.floor(score/5);
-                let displayDist = Math.min(currentDist, targetScore);
+                let displayDist = currentDist;
+                
+                if (displayDist >= targetScore) {
+                    if (finishLine && finishLine.crossed) {
+                        displayDist = targetScore;
+                    } else {
+                        displayDist = targetScore - 1;
+                    }
+                }
+                
                 document.getElementById('score-display').innerText = `距離: ${displayDist} 米`;
 
-                // 基礎速度與擾動
                 speedMultiplier = 1 + (score * 0.001); 
                 
                 if (currentDist >= 450) {
@@ -1360,13 +1393,21 @@
             const idiomDesc = document.getElementById('idiom-desc');
 
             endScreen.classList.remove('hidden');
+            
+            let finalScore = Math.floor(score/5);
+            if (!isWin && finalScore >= targetScore) {
+                finalScore = targetScore - 1;
+            }
+            
+            let displayScore = isWin ? targetScore : finalScore;
+            document.getElementById('score-display').innerText = `距離: ${displayScore} 米`;
 
             if (isWin) {
                 title.innerText = "馬到功成！";
                 title.style.color = "#d62828"; 
                 if (currentPlayerName) {
                     scoreText.innerText = `恭喜 ${currentPlayerName} 到達了 ${targetScore} 米終點！`;
-                    // --- 儲存到排行榜 ---
+                    // 這裡傳入的名字不帶 @天氣，保持排行榜乾淨
                     saveRecord(currentPlayerName, targetScore);
                 } else {
                     scoreText.innerText = `恭喜你到達了 ${targetScore} 米終點！`;
@@ -1375,12 +1416,13 @@
             } else {
                 title.innerText = "再接再厲";
                 title.style.color = "#555";
-                let finalScore = Math.min(Math.floor(score/5), targetScore);
+                if(currentPlayerName && finalScore > 0) {
+                    saveRecord(currentPlayerName, finalScore);
+                }
                 if (currentPlayerName) {
-                    scoreText.innerText = `${currentPlayerName} 本次奔跑距離：${finalScore} 米`;
-                    if (finalScore > 0) saveRecord(currentPlayerName, finalScore);
+                    scoreText.innerText = `${currentPlayerName} 本次奔跑距離：${displayScore} 米`;
                 } else {
-                    scoreText.innerText = `本次奔跑距離：${finalScore} 米`;
+                    scoreText.innerText = `本次奔跑距離：${displayScore} 米`;
                 }
                 playFailSound();
             }
@@ -1397,11 +1439,25 @@
         }
 
         function handleInput(e) {
-            // 修正：允許在輸入框中輸入空白，不阻止默認行為
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
-                return;
+            // Special handling for Enter key
+            if (e.key === 'Enter') {
+                if (e.target.id === 'admin-password') {
+                    window.confirmClearLeaderboard();
+                    return;
+                }
+                if (e.target.id === 'custom-name-input') {
+                     window.startGame();
+                     return;
+                }
+                // General Enter to start
+                if (!document.getElementById('start-screen').classList.contains('hidden')) {
+                    window.startGame();
+                    return;
+                }
             }
 
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+            
             if (e.code === 'Space' || e.key === ' ') {
                 e.preventDefault();
             }
