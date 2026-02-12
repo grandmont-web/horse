@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水墨奔騰迎錦泰</title>
+    <!-- 引入 Tailwind CSS 進行快速排版 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Google Fonts：Ma Shan Zheng 與 Noto Serif TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 自訂水墨風格與直書 CSS */
+        body {
+            /* 取消外部圖片背景，改為單純的漸層底色，後續由 Canvas 繪製水墨竹林 */
+            background: linear-gradient(135deg, #f4f1ea, #e2dac8);
+            font-family: 'Noto Serif TC', serif;
+        }
+
+        .brush-font {
+            font-family: 'Ma Shan Zheng', cursive;
+        }
+
+        /* 讓文字在複雜圖片背景下依然清晰的邊緣光暈效果 */
+        .ink-shadow {
+            text-shadow: 
+                0px 0px 15px rgba(255, 255, 255, 0.9),
+                0px 0px 30px rgba(255, 255, 255, 0.8),
+                2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 印章樣式 */
+        .seal {
+            color: #bd2d2d;
+            border: 3px solid #bd2d2d;
+            border-radius: 4px;
+            padding: 8px 4px;
+            font-weight: bold;
+            letter-spacing: 0.2rem;
+            opacity: 0.85;
+            /* 模擬一點印泥暈染的感覺 */
+            box-shadow: inset 0 0 2px rgba(189,45,45,0.5);
+            background-color: rgba(255,255,255,0.4);
+        }
+
+        /* 左側玻璃透視容器樣式 */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 10px 15px 35px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="w-screen h-screen m-0 p-0 overflow-hidden relative text-gray-900">
+
+    <!-- 水墨山水風景 Canvas 背景 -->
+    <canvas id="landscape-canvas" class="absolute inset-0 w-full h-full z-0 pointer-events-none"></canvas>
+
+    <!-- 增加一層淡淡的宣紙紋理遮罩，讓水墨背景更柔和 -->
+    <div class="absolute inset-0 bg-white/10 backdrop-blur-[1px] pointer-events-none z-0"></div>
+
+    <!-- 主要內容區：左右兩等份 -->
+    <div class="relative w-full h-full max-w-[1600px] mx-auto flex flex-row z-10">
+
+        <!-- 左半部：長方形網頁區塊 -->
+        <div class="w-1/2 h-full flex items-center justify-center p-4 lg:p-8">
+            <!-- 
+                左方長方形區塊 (裝載您的網頁)
+                高度改為99% (h-[95%])
+            -->
+            <div class="glass-panel w-full h-[95%] rounded-xl overflow-hidden flex flex-col z-10 transition-transform hover:scale-[1.01] duration-500">
+                <!-- 裝飾用頂部細條 -->
+                <div class="w-full h-2 bg-gradient-to-r from-gray-700 via-gray-900 to-gray-700"></div>
+                
+                <!-- 裝著另一個網頁的 iframe -->
+                <iframe 
+                    id="user-content-frame"
+                    class="w-full h-full border-none flex-grow bg-white/50" 
+                    src="horse.htm"
+                    title="自訂網頁內容"
+                ></iframe>
+            </div>
+        </div>
+
+        <!-- 右半部：標題與玩法說明 -->
+        <div class="w-1/2 h-full flex flex-col items-center justify-center z-10 p-8 text-center">
+            
+            <!-- 草書但清晰的大標題 -->
+            <h1 class="brush-font text-6xl md:text-7xl lg:text-[6rem] tracking-[0.25rem] md:tracking-[0.5rem] text-black ink-shadow mb-16">
+                水墨奔騰迎錦泰
+            </h1>
+
+            <!-- 玩法說明區塊 (加大方框與文字) -->
+            <div class="glass-panel w-[90%] max-w-[650px] p-10 md:p-14 rounded-2xl flex flex-col gap-6 text-2xl md:text-3xl lg:text-4xl text-gray-900 font-bold ink-shadow">
+                <h2 class="text-4xl md:text-5xl font-black border-b-4 border-gray-600 pb-4 mb-2">玩法</h2>
+                <p>點擊電腦畫面或按空白鍵</p>
+								<p>控制駿馬跳躍</p>
+								<p>避開障礙，直奔終點</p>
+                <p></p>
+            </div>
+
+        </div>
+
+        <!-- 右下角的駿馬圖片 (長約17%, 高約29%，盡量靠右) -->
+        <img src="ink_horse.png" alt="水墨駿馬" class="absolute bottom-[0%] right-0 w-[19%] h-[30%] object-contain pointer-events-none z-20 opacity-90">
+
+    </div>
+
+    <script>
+        // === 水墨山水風景生成器 ===
+        const canvas = document.getElementById('landscape-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // 確保畫布尺寸隨視窗調整
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drawLandscape();
+        }
+
+        window.addEventListener('resize', resize);
+
+        function drawLandscape() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. 畫紅日 (遠處)
+            drawSun();
+
+            // 2. 畫群山 (由遠到近)
+            // 參數: 基準高度比例, 起伏幅度, 水平縮放, 顏色透明度, 模糊度
+            drawMountain(0.4, 150, 0.003, 0.1, 8);  // 極遠山
+            drawMountain(0.55, 200, 0.005, 0.2, 4); // 遠山
+            drawMountain(0.75, 250, 0.008, 0.4, 1); // 中景
+            drawMountain(1.0, 300, 0.012, 0.7, 0);  // 近景
+
+            // 3. 畫飛鳥
+            drawBirds();
+        }
+
+        function drawSun() {
+            ctx.save();
+            ctx.filter = 'blur(4px)';
+            ctx.beginPath();
+            // 太陽位置在畫面右側偏上
+            const sunX = canvas.width * 0.78;
+            const sunY = canvas.height * 0.15;
+            ctx.arc(sunX, sunY, 40, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(236, 183, 92, 0.3)'; // 傳統印泥/硃砂紅色
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawMountain(baseYRatio, amplitude, scale, alpha, blur) {
+            ctx.save();
+            ctx.filter = `blur(${blur}px)`;
+            
+            // 讓山峰有水墨漸層感 (上深下淺)
+            const baseY = canvas.height * baseYRatio;
+            const gradient = ctx.createLinearGradient(0, baseY - amplitude, 0, canvas.height);
+            gradient.addColorStop(0, `rgba(30, 32, 28, ${alpha})`);
+            gradient.addColorStop(1, `rgba(30, 32, 28, ${alpha * 0.2})`); // 底部變淡融入雲霧
+            
+            ctx.fillStyle = gradient;
+            
+            // 加入隨機偏移讓每次重整的山都不一樣
+            const offset = Math.random() * 10000;
+
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height);
+            
+            for (let x = 0; x <= canvas.width + 10; x += 10) {
+                // 利用多重正弦波疊加產生山脈邊緣輪廓
+                const nx = (x + offset) * scale;
+                // 基礎波形 + 細節雜訊
+                let y = baseY - amplitude * (
+                    Math.sin(nx) * 0.5 + 
+                    Math.sin(nx * 2.3 + offset) * 0.25 + 
+                    Math.sin(nx * 4.7 + offset) * 0.125 +
+                    Math.abs(Math.sin(nx * 7.1)) * 0.15 // 產生山峰尖角
+                );
+                
+                ctx.lineTo(x, y);
+            }
+            
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawBirds() {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(40, 42, 38, 0.8)';
+            ctx.lineWidth = 1.5;
+            
+            const numBirds = 3 + Math.floor(Math.random() * 5);
+            // 讓鳥群出現在畫面的中上方
+            const startX = canvas.width * 0.5 + Math.random() * 200;
+            const startY = canvas.height * 0.25 + Math.random() * 100;
+
+            for (let i = 0; i < numBirds; i++) {
+                // 鳥的排列呈稍微的雁陣 (V字型或斜線)
+                const bx = startX + i * 45 + (Math.random() * 10 - 5);
+                const by = startY - i * 15 + (Math.random() * 20 - 10);
+                const size = 6 + Math.random() * 6;
+
+                ctx.beginPath();
+                // 畫 V 字形的飛鳥
+                ctx.moveTo(bx - size, by - size * 0.5);
+                ctx.quadraticCurveTo(bx - size*0.2, by, bx, by);
+                ctx.quadraticCurveTo(bx + size*0.2, by, bx + size, by - size * 0.6);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        // 初始化繪製
+        resize();
+    </script>
+</body>
+</html>
